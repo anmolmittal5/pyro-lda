@@ -14,7 +14,7 @@ import time
 import os
 
 assert pyro.__version__.startswith('1.8.1')
-# Enable smoke test - run the notebook cells on CI.
+# Enable smoke test - run on CI.
 smoke_test = 'CI' in os.environ
 
 
@@ -93,90 +93,3 @@ class ProdLDA(nn.Module):
     def beta(self):
         # beta matrix elements are the weights of the FC layer on the decoder
         return self.decoder.beta.weight.cpu().detach().T
-    
-
-
-    
-
-
-# if __name__ == '__main__':
-#     seed = 0
-#     df = pd.read_csv('/home/jupyter/Anmol/ner_news/data/economic_times_news_data_total_processed.csv')
-#     df.dropna(inplace=True)
-#     print('df is ready')
-    
-#     docs = []
-#     helper = Helper()
-#     vectorizer = CountVectorizer(max_df=0.5, min_df=20, ngram_range=(1,3))
-#     print('initialised the Count Vectorizer')
-
-#     vectorizer.fit(df['body'])
-#     chunks = helper.split_dataframe(df)
-    
-#     for chunk in chunks:
-#         docs.append(torch.from_numpy(vectorizer.transform(chunk).toarray()))
-#         time.sleep(2)
-#     # docs = torch.from_numpy(vectorizer.fit_transform(df['body']).toarray())
-#     # print(vectorised)
-    
-#     tensor = docs[0]
-#     for i in range(1, len(docs) - 1):
-#         tensor = torch.cat((tensor, docs[i]), 0)
-#         time.sleep(2)
-        
-#     vocab = pd.DataFrame(columns=['word', 'index'])
-#     vocab['word'] = vectorizer.get_feature_names()
-#     vocab['index'] = vocab.index
-    
-#     torch.manual_seed(seed)
-#     pyro.set_rng_seed(seed)
-#     device = torch.device("cpu")
-
-#     num_topics = 200 if not smoke_test else 100
-#     docs = tensor.float().to(device)
-    
-# #     parameters
-#     batch_size = 32
-#     learning_rate = 1e-3
-#     num_epochs = 100 if not smoke_test else 1
-    
-#     pyro.clear_param_store()
-
-#     prodLDA = ProdLDA(
-#         vocab_size=docs.shape[1],
-#         num_topics=num_topics,
-#         hidden=100 if not smoke_test else 10,
-#         dropout=0.2
-#     )
-#     prodLDA.to(device)
-
-#     optimizer = pyro.optim.Adam({"lr": learning_rate})
-#     svi = SVI(prodLDA.model, prodLDA.guide, optimizer, loss=TraceMeanField_ELBO())
-#     num_batches = int(math.ceil(docs.shape[0] / batch_size)) if not smoke_test else 1
-
-#     bar = trange(num_epochs)
-#     for epoch in bar:
-#         running_loss = 0.0
-#         for i in range(num_batches):
-#             batch_docs = docs[i * batch_size:(i + 1) * batch_size, :]
-#             loss = svi.step(batch_docs)
-#             running_loss += loss / batch_docs.size(0)
-
-#         bar.set_postfix(epoch_loss='{:.2e}'.format(running_loss))
-        
-#     beta = prodLDA.beta()
-#     print(beta)
-    
-    
-# #     if not smoke_test:
-# #         import matplotlib.pyplot as plt
-# #         from wordcloud import WordCloud
-
-# #         beta = prodLDA.beta()
-# #         fig, axs = plt.subplots(7, 3, figsize=(14, 24))
-# #         for n in range(beta.shape[0]):
-# #             i, j = divmod(n, 3)
-# #             helper.plot_word_cloud(beta[n], axs[i, j], vocab, n)
-# #         axs[-1, -1].axis('off');
-
-# #         plt.show()
